@@ -56,18 +56,3 @@ SqrtExp::~SqrtExp() {}
 IdExp::IdExp(string v) : value(v) {}
 
 IdExp::~IdExp() {}
-
-ElifStatement::ElifStatement(Exp* cond, Body* body) : condition(cond), elifbody(body) {}
-
-IfStatement::IfStatement() : condition(nullptr), ifbody(nullptr), elsebody(nullptr) {}
-IfStatement::IfStatement(Exp* e) : condition(e), ifbody(nullptr), elsebody(nullptr) {}
-
-DoWhileStatement::DoWhileStatement() : body(nullptr), condition(nullptr) {}
-DoWhileStatement::DoWhileStatement(Body* b, Exp* c) : body(b), condition(c) {}
-
-WhileStatement::WhileStatement() : condition(nullptr), body(nullptr) {}
-WhileStatement::WhileStatement(Exp* c, Body* b) : condition(c), body(b) {}
-
-Case::Case(Exp* v, Body* b) : valor(v), cuerpo(b) {}
-
-SwitchStatement::SwitchStatement() : condition(nullptr), defaultBody(nullptr) {}

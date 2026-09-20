@@ -8,9 +8,8 @@ limite=5
 continuar=true
 while n <= limite and continuar == true do
 suma=suma + n
-if suma >= 10 then 
+if suma >= 10 then
 continuar=false
-endif
 n=n + 1
 endwhile
 print(n)

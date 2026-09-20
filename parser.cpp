@@ -60,7 +60,6 @@ Program* Parser::parseProgram() {
     Program* programa = new Program();
     programa->cuerpo.push_back(parseStm());
     while(match(Token::SEMICOLON)){
-        if (isAtEnd()) break;
         programa->cuerpo.push_back(parseStm());
     }
     if (!isAtEnd()) {
@@ -70,126 +69,120 @@ Program* Parser::parseProgram() {
     return programa;
 }
 
-Body* Parser::parseBody(){
-    Body* body = new Body();
-    body->list_stm.push_back(parseStm());
-    while(match(Token::SEMICOLON)){
-        if (check(Token::ENDIF) || check(Token::ELIF) || check(Token::ELSE) || check(Token::WHILE) || check(Token::ENDWHILE)
-            || check(Token::CASE) || check(Token::DEFAULT) || check(Token::ENDSWITCH)) {
-            break;
-        }
-        body->list_stm.push_back(parseStm());
-    }
-    return body;
-}
-
-Case* Parser::parseCase() {
-    match(Token::CASE);
-    Exp* valor = parseCExp();
-    Body* cuerpo = parseBody();
-    return new Case(valor, cuerpo);
-}
-
 Stm* Parser::parseStm(){
     if (match(Token::ID))
     {
         AssignStatement* stm = new AssignStatement();
         stm->variable = previous->text;
         match(Token::ASSIGN);
-        stm->valor =  parseCExp();
+        stm->valor =  parseCE();
         return stm;
     }
     else if (match(Token::PRINT))
     {
         PrintStatement* stm = new PrintStatement();
         match(Token::LPAREN);
-        stm->valor =  parseCExp();
+        stm->valor =  parseCE();
         match(Token::RPAREN);
 
         return stm;
     }
-    else if (match(Token::BREAK))
+    else if (match(Token::SWITCH))
     {
-        return new BreakStatement();
+        SwitchStatement* stm = new SwitchStatement();
+        stm->condition = parseCE();
+        while (check(Token::CASE)) {
+            stm->cases.push_back(parseCase());
+        }
+        if (check(Token::DEFAULT)) {
+            stm->defaultCase = parseDefaultCase();
+        }
+        match(Token::ENDSWITCH);
+        return stm;
     }
     else if (match(Token::IF))
     {
         IfStatement* stm = new IfStatement();
-        stm->condition = parseCExp();
-        if (!match(Token::THEN)) {
-            throw runtime_error("Error sintáctico: se esperaba 'then'");
-        }
-        stm->ifbody = parseBody();
+        stm->condition = parseCE();
+        match(Token::THEN);
+        stm->thenBody = parseBody();
+
+        IfStatement* actual = stm;
         while (match(Token::ELIF)) {
-            Exp* elifCond = parseCExp();
-            if (!match(Token::THEN)) {
-                throw runtime_error("Error sintáctico: se esperaba 'then'");
-            }
-            Body* elifBody = parseBody();
-            stm->elif_list.push_back(new ElifStatement(elifCond, elifBody));
+            IfStatement* rama = new IfStatement();
+            rama->condition = parseCE();
+            match(Token::THEN);
+            rama->thenBody = parseBody();
+            actual->elseIf = rama;
+            actual = rama;
         }
         if (match(Token::ELSE)) {
-            stm->elsebody = parseBody();
+            actual->elseBody = parseBody();
         }
-        if (!match(Token::ENDIF)) {
-            throw runtime_error("Error sintáctico: se esperaba 'endif'");
-        }
+        match(Token::ENDIF);
         return stm;
     }
     else if (match(Token::DO))
     {
         DoWhileStatement* stm = new DoWhileStatement();
         stm->body = parseBody();
-        if (!match(Token::WHILE)) {
-            throw runtime_error("Error sintáctico: se esperaba 'while'");
-        }
-        stm->condition = parseCExp();
+        match(Token::WHILE);
+        stm->condition = parseCE();
         return stm;
     }
     else if (match(Token::WHILE))
     {
         WhileStatement* stm = new WhileStatement();
-        stm->condition = parseCExp();
-        if (!match(Token::DO)) {
-            throw runtime_error("Error sintáctico: se esperaba 'do'");
-        }
+        stm->condition = parseCE();
+        match(Token::DO);
         stm->body = parseBody();
-        if (!match(Token::ENDWHILE)) {
-            throw runtime_error("Error sintáctico: se esperaba 'endwhile'");
-        }
+        match(Token::ENDWHILE);
         return stm;
     }
-    else if (match(Token::SWITCH))
+    else if (match(Token::BREAK))
     {
-        SwitchStatement* stm = new SwitchStatement();
-        stm->condition = parseCExp();
-        while (check(Token::CASE)) {
-            stm->cases.push_back(parseCase());
-        }
-        if (match(Token::DEFAULT)) {
-            stm->defaultBody = parseBody();
-        }
-        if (!match(Token::ENDSWITCH)) {
-            throw runtime_error("Error sintáctico: se esperaba 'endswitch'");
-        }
-        return stm;
+        return new BreakStatement();
     }
+
     else {
         throw runtime_error("Error sintáctico");
     }
-
 }
 
-Exp* Parser::parseCExp() {
-    Exp* l = parseLAndExp();
+Case* Parser::parseCase() {
+    Case* c = new Case();
+    match(Token::CASE);
+    c->valor = parseCE();
+    c->cuerpo = parseBody();
+    return c;
+}
+
+Case* Parser::parseDefaultCase() {
+    Case* c = new Case();
+    match(Token::DEFAULT);
+    c->cuerpo = parseBody();
+    return c;
+}
+
+list<Stm*> Parser::parseBody() {
+    list<Stm*> body;
+    body.push_back(parseStm());
+    while (match(Token::SEMICOLON)) {
+        body.push_back(parseStm());
+    }
+    return body;
+}
+
+Exp* Parser::parseCE() {
+    Exp* l = parseAndExp();
     while (match(Token::OR)) {
-        Exp* r = parseLAndExp();
+        Exp* r = parseAndExp();
         l = new BinaryExp(l, r, OR_OP);
     }
     return l;
 }
 
-Exp* Parser::parseLAndExp() {
+Exp* Parser::parseAndExp() {
     Exp* l = parseRelExp();
     while (match(Token::AND)) {
         Exp* r = parseRelExp();
@@ -218,7 +211,7 @@ Exp* Parser::parseRelExp() {
 }
 
 Exp* Parser::parseExpr() {
-    Exp* l = parseTerm();
+    Exp* l = parseE();
     while (match(Token::PLUS) || match(Token::MINUS)) {
         BinaryOp op;
         if (previous->type == Token::PLUS){
@@ -227,7 +220,7 @@ Exp* Parser::parseExpr() {
         else{
             op = MINUS_OP;
         }
-        Exp* r = parseTerm();
+        Exp* r = parseE();
         l = new BinaryExp(l, r, op);
     }
     return l;
@@ -235,8 +228,8 @@ Exp* Parser::parseExpr() {
 
 
 
-Exp* Parser::parseTerm() {
-    Exp* l = parsePowExp();
+Exp* Parser::parseE() {
+    Exp* l = parseT();
     while (match(Token::MUL) || match(Token::DIV)) {
         BinaryOp op;
         if (previous->type == Token::MUL){
@@ -245,24 +238,24 @@ Exp* Parser::parseTerm() {
         else{
             op = DIV_OP;
         }
-        Exp* r = parsePowExp();
+        Exp* r = parseT();
         l = new BinaryExp(l, r, op);
     }
     return l;
 }
 
 
-Exp* Parser::parsePowExp() {
-    Exp* l = parseFactor();
+Exp* Parser::parseT() {
+    Exp* l = parseF();
     if (match(Token::POW)) {
         BinaryOp op = POW_OP;
-        Exp* r = parseFactor();
+        Exp* r = parseF();
         l = new BinaryExp(l, r, op);
     }
     return l;
 }
 
-Exp* Parser::parseFactor() {
+Exp* Parser::parseF() {
     Exp* e;
     if (match(Token::NUM)) {
         return new NumberExp(stoi(previous->text));
@@ -273,22 +266,22 @@ Exp* Parser::parseFactor() {
     else if (match(Token::FALSE)) {
         return new BoolExp(false);
     }
+    else if (match(Token::ID)) {
+        string va  = previous->text;
+        return new IdExp(va);
+    }
     else if (match(Token::LPAREN))
     {
-        e = parseCExp();
+        e = parseCE();
         match(Token::RPAREN);
         return e;
     }
     else if (match(Token::SQRT))
     {
         match(Token::LPAREN);
-        e = parseCExp();
+        e = parseCE();
         match(Token::RPAREN);
         return new SqrtExp(e);
-    }
-    else if (match(Token::ID)) {
-        string va  = previous->text;
-        return new IdExp(va);
     }
     else {
         throw runtime_error("Error sintáctico");

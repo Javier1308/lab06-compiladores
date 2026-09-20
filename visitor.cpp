@@ -44,15 +44,11 @@ int BreakStatement::accept(Visitor* visitor) {
     return visitor->visit(this);
 }
 
-int Body::accept(Visitor* visitor) {
-    return visitor->visit(this);
+int SwitchStatement::accept(Visitor* visitor) {
+    return visitor-> visit(this);
 }
 
 int IfStatement::accept(Visitor* visitor) {
-    return visitor->visit(this);
-}
-
-int ElifStatement::accept(Visitor* visitor) {
     return visitor->visit(this);
 }
 
@@ -61,10 +57,6 @@ int DoWhileStatement::accept(Visitor* visitor) {
 }
 
 int WhileStatement::accept(Visitor* visitor) {
-    return visitor->visit(this);
-}
-
-int SwitchStatement::accept(Visitor* visitor) {
     return visitor->visit(this);
 }
 
@@ -124,46 +116,42 @@ int PrintVisitor::visit(BreakStatement* p) {
     return 0;
 }
 
-
-int PrintVisitor::visit(IdExp* p) {
-    cout << p->value ;
-    return 0;
-}
-
-int PrintVisitor::visit(Body* p) {
-    for (auto stm : p->list_stm) {
-        stm->accept(this);
+int PrintVisitor::visit(SwitchStatement* p) {
+    cout << "switch ";
+    p->condition->accept(this);
+    cout << endl;
+    for (auto c : p->cases) {
+        cout << "case ";
+        c->valor->accept(this);
+        cout << endl;
+        for (auto s : c->cuerpo) s->accept(this);
     }
+    if (p->defaultCase) {
+        cout << "default" << endl;
+        for (auto s : p->defaultCase->cuerpo) s->accept(this);
+    }
+    cout << "endswitch" << endl;
     return 0;
 }
 
 int PrintVisitor::visit(IfStatement* p) {
     cout << "if ";
     p->condition->accept(this);
-    cout << " then " << endl;
-    p->ifbody->accept(this);
-    for (auto elif : p->elif_list) {
-        elif->accept(this);
-    }
-    if (p->elsebody) {
+    cout << " then" << endl;
+    for (auto s : p->thenBody) s->accept(this);
+    if (p->elseIf) {
+        cout << "elif" << endl;
+        p->elseIf->accept(this);
+    } else if (!p->elseBody.empty()) {
         cout << "else" << endl;
-        p->elsebody->accept(this);
+        for (auto s : p->elseBody) s->accept(this);
     }
-    cout << "endif" << endl;
-    return 0;
-}
-
-int PrintVisitor::visit(ElifStatement* p) {
-    cout << "elif ";
-    p->condition->accept(this);
-    cout << " then " << endl;
-    p->elifbody->accept(this);
     return 0;
 }
 
 int PrintVisitor::visit(DoWhileStatement* p) {
     cout << "do" << endl;
-    p->body->accept(this);
+    for (auto s : p->body) s->accept(this);
     cout << "while ";
     p->condition->accept(this);
     cout << endl;
@@ -174,26 +162,13 @@ int PrintVisitor::visit(WhileStatement* p) {
     cout << "while ";
     p->condition->accept(this);
     cout << " do" << endl;
-    p->body->accept(this);
+    for (auto s : p->body) s->accept(this);
     cout << "endwhile" << endl;
     return 0;
 }
 
-int PrintVisitor::visit(SwitchStatement* p) {
-    cout << "switch ";
-    p->condition->accept(this);
-    cout << endl;
-    for (auto c : p->cases) {
-        cout << "case ";
-        c->valor->accept(this);
-        cout << endl;
-        c->cuerpo->accept(this);
-    }
-    if (p->defaultBody) {
-        cout << "default" << endl;
-        p->defaultBody->accept(this);
-    }
-    cout << "endswitch" << endl;
+int PrintVisitor::visit(IdExp* p) {
+    cout << p->value ;
     return 0;
 }
 
@@ -311,69 +286,48 @@ int EVALVisitor::visit(BreakStatement* p) {
     return 0;
 }
 
-
-
-int EVALVisitor::visit(IdExp* p) {
-    return memoria[p->value];
-}
-
-int EVALVisitor::visit(Body* p) {
-    for (auto stm : p->list_stm) {
-        stm->accept(this);
+int EVALVisitor::visit(SwitchStatement* p) {
+    int val = p->condition->accept(this);
+    for (auto c : p->cases) {
+        if (c->valor->accept(this) == val) {
+            for (auto s : c->cuerpo) {
+                s->accept(this);
+            }
+            return 0;
+        }
+    }
+    if (p->defaultCase) {
+        for (auto s : p->defaultCase->cuerpo) s->accept(this);
     }
     return 0;
 }
 
 int EVALVisitor::visit(IfStatement* p) {
-    if (p->condition->accept(this)) {
-        p->ifbody->accept(this);
+    int val = p->condition->accept(this);
+    if (val) {
+        for (auto s : p->thenBody) s->accept(this);
+    } else if (p->elseIf) {
+        p->elseIf->accept(this);
     } else {
-        bool executed = false;
-        for (auto elif : p->elif_list) {
-            if (elif->condition->accept(this)) {
-                elif->elifbody->accept(this);
-                executed = true;
-                break;
-            }
-        }
-        if (!executed && p->elsebody) {
-            p->elsebody->accept(this);
-        }
+        for (auto s : p->elseBody) s->accept(this);
     }
-    return 0;
-}
-
-int EVALVisitor::visit(ElifStatement* p) {
-    p->elifbody->accept(this);
     return 0;
 }
 
 int EVALVisitor::visit(DoWhileStatement* p) {
     do {
-        p->body->accept(this);
+        for (auto s : p->body) s->accept(this);
     } while (p->condition->accept(this));
     return 0;
 }
 
 int EVALVisitor::visit(WhileStatement* p) {
     while (p->condition->accept(this)) {
-        p->body->accept(this);
+        for (auto s : p->body) s->accept(this);
     }
     return 0;
 }
 
-int EVALVisitor::visit(SwitchStatement* p) {
-    int val = p->condition->accept(this);
-    bool matched = false;
-    for (auto c : p->cases) {
-        if (c->valor->accept(this) == val) {
-            c->cuerpo->accept(this);
-            matched = true;
-            break;
-        }
-    }
-    if (!matched && p->defaultBody) {
-        p->defaultBody->accept(this);
-    }
-    return 0;
+int EVALVisitor::visit(IdExp* p) {
+    return memoria[p->value];
 }

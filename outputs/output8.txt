@@ -12,12 +12,11 @@ saldo=saldo + monto
 exito=true
 break
 case 2
-if monto <= saldo then 
+if monto <= saldo then
 saldo=saldo - monto
 exito=true
 else
 exito=false
-endif
 break
 case 3
 exito=true

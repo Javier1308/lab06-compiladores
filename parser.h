@@ -15,16 +15,17 @@ private:
 public:
     Parser(Scanner* scanner);
     Program* parseProgram();             // Punto de entrada: analiza un programa completo
-    Body* parseBody();
     Stm* parseStm();
+    list<Stm*> parseBody();
     Case* parseCase();
-    Exp* parseCExp();                 // Regla gramatical CExp / LOrExp
-    Exp* parseLAndExp();              // Regla gramatical LAndExp
+    Case* parseDefaultCase();
+    Exp* parseCE();                   // Regla gramatical CExp / LOrExp
+    Exp* parseAndExp();               // Regla gramatical LAndExp
     Exp* parseRelExp();               // Regla gramatical RelExp
     Exp* parseExpr();                 // Regla gramatical Expr
-    Exp* parseTerm();                 // Regla gramatical Term
-    Exp* parsePowExp();               // Regla gramatical PowExp
-    Exp* parseFactor();               // Regla gramatical Factor
+    Exp* parseE();                    // Regla gramatical Term
+    Exp* parseT();                    // Regla gramatical PowExp
+    Exp* parseF();                    // Regla gramatical Factor
 };
 
 #endif // PARSER_H

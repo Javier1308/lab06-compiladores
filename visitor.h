@@ -8,17 +8,6 @@ class BinaryExp;
 class NumberExp;
 class BoolExp;
 class SqrtExp;
-class IdExp;
-class Program;
-class PrintStatement;
-class AssignStatement;
-class BreakStatement;
-class Body;
-class IfStatement;
-class ElifStatement;
-class DoWhileStatement;
-class WhileStatement;
-class SwitchStatement;
 
 class Visitor {
 public:
@@ -31,12 +20,10 @@ public:
     virtual int visit(PrintStatement* stm) = 0;
     virtual int visit(AssignStatement* stm) = 0;
     virtual int visit(BreakStatement* stm) = 0;
-    virtual int visit(Body* stm) = 0;
+    virtual int visit(SwitchStatement* stm) = 0;
     virtual int visit(IfStatement* stm) = 0;
-    virtual int visit(ElifStatement* stm) = 0;
     virtual int visit(DoWhileStatement* stm) = 0;
     virtual int visit(WhileStatement* stm) = 0;
-    virtual int visit(SwitchStatement* stm) = 0;
 };
 
 class PrintVisitor : public Visitor {
@@ -51,12 +38,10 @@ public:
     int visit(PrintStatement* stm) override;
     int visit(AssignStatement* stm) override;
     int visit(BreakStatement* stm) override;
-    int visit(Body* stm) override;
+    int visit(SwitchStatement* stm) override;
     int visit(IfStatement* stm) override;
-    int visit(ElifStatement* stm) override;
     int visit(DoWhileStatement* stm) override;
     int visit(WhileStatement* stm) override;
-    int visit(SwitchStatement* stm) override;
     void imprimir(Program* program);
 };
 
@@ -72,12 +57,10 @@ public:
     int visit(PrintStatement* stm) override;
     int visit(AssignStatement* stm) override;
     int visit(BreakStatement* stm) override;
-    int visit(Body* stm) override;
+    int visit(SwitchStatement* stm) override;
     int visit(IfStatement* stm) override;
-    int visit(ElifStatement* stm) override;
     int visit(DoWhileStatement* stm) override;
     int visit(WhileStatement* stm) override;
-    int visit(SwitchStatement* stm) override;
     void interprete(Program* program);
 };
 

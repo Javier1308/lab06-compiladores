@@ -10,11 +10,10 @@ case 1
 descuento=10
 break
 case 2
-if monto >= 100 then 
+if monto >= 100 then
 descuento=25
 else
 descuento=15
-endif
 break
 case 3
 descuento=30
