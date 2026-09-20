@@ -1,0 +1,31 @@
+=== STDOUT ===
+Parseo exitoso
+Codigo:
+PROGRAMA
+tipoCliente=2
+monto=150
+descuento=0
+switch tipoCliente
+case 1
+descuento=10
+break
+case 2
+if monto >= 100 then 
+descuento=25
+else
+descuento=15
+endif
+break
+case 3
+descuento=30
+break
+default
+descuento=0
+endswitch
+total=monto - descuento
+print(total)
+
+Interprete:
+125
+
+=== STDERR ===
