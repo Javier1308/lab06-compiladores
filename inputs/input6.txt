@@ -1,0 +1,22 @@
+paso = 1;
+cuenta = 0;
+do
+    switch paso
+    case 1
+        cuenta = cuenta + 5;
+        paso = 2;
+        break
+    case 2
+        cuenta = cuenta + 10;
+        paso = 3;
+        break
+    case 3
+        cuenta = cuenta + 20;
+        paso = 4;
+        break
+    default
+        paso = 5
+    endswitch
+while paso <= 3 and cuenta < 50;
+print(cuenta);
+print(paso)

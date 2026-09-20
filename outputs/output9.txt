@@ -1,0 +1,19 @@
+=== STDOUT ===
+Parseo exitoso
+Codigo:
+PROGRAMA
+base=3
+exp=2
+pot=base ** exp
+raiz=sqrt(pot)
+esCorrecto=raiz == base and pot == 9
+print(pot)
+print(raiz)
+print(esCorrecto)
+
+Interprete:
+9
+3
+1
+
+=== STDERR ===

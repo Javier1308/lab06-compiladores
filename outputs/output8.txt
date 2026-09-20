@@ -1,0 +1,35 @@
+=== STDOUT ===
+Parseo exitoso
+Codigo:
+PROGRAMA
+saldo=500
+operacion=2
+monto=150
+exito=false
+switch operacion
+case 1
+saldo=saldo + monto
+exito=true
+break
+case 2
+if monto <= saldo then 
+saldo=saldo - monto
+exito=true
+else
+exito=false
+endif
+break
+case 3
+exito=true
+break
+default
+exito=false
+endswitch
+print(saldo)
+print(exito)
+
+Interprete:
+350
+1
+
+=== STDERR ===

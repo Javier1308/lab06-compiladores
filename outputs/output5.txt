@@ -1,0 +1,25 @@
+=== STDOUT ===
+Parseo exitoso
+Codigo:
+PROGRAMA
+n=1
+suma=0
+limite=5
+continuar=true
+while n <= limite and continuar == true do
+suma=suma + n
+if suma >= 10 then 
+continuar=false
+endif
+n=n + 1
+endwhile
+print(n)
+print(suma)
+print(continuar)
+
+Interprete:
+5
+10
+0
+
+=== STDERR ===

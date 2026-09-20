@@ -1,0 +1,22 @@
+i = 1;
+pares = 0;
+impares = 0;
+while i <= 6 do
+    switch i
+    case 2
+        pares = pares + 1;
+        break
+    case 4
+        pares = pares + 1;
+        break
+    case 6
+        pares = pares + 1;
+        break
+    default
+        impares = impares + 1
+    endswitch;
+    i = i + 1
+endwhile;
+print(pares);
+print(impares);
+print(i)

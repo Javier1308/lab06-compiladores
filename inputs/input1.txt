@@ -1,0 +1,13 @@
+edad = 20;
+tienePase = true;
+bloqueado = false;
+puedeEntrar = false;
+if edad >= 18 and tienePase == true and bloqueado == false then
+    puedeEntrar = true;
+    codigo = 1
+else
+    puedeEntrar = false;
+    codigo = 0
+endif;
+print(puedeEntrar);
+print(codigo)

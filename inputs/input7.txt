@@ -1,0 +1,10 @@
+x = 8;
+y = 15;
+b1 = x < 10 and y > 10;
+b2 = x == 5 or y == 15;
+b3 = false or true and false;
+b4 = true and (x + 2 == 10);
+print(b1);
+print(b2);
+print(b3);
+print(b4)

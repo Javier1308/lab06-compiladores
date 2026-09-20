@@ -1,0 +1,23 @@
+=== STDOUT ===
+Parseo exitoso
+Codigo:
+PROGRAMA
+nota1=14
+nota2=18
+promedio=nota1 + nota2 / 2
+estado=0
+if promedio >= 14 and promedio <= 20 then 
+estado=1
+elif promedio >= 11 and promedio < 14 then 
+estado=2
+else
+estado=3
+endif
+print(promedio)
+print(estado)
+
+Interprete:
+16
+1
+
+=== STDERR ===
